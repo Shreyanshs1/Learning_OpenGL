@@ -27,3 +27,17 @@
 **Decision:** Use GLEW to load OpenGL functions.  
 **Alternatives considered:** GLAD.  
 **Why chosen:** Following The Cherno’s YouTube tutorial.
+
+## 2025-10-10 — Git revert
+
+**Decision:** Revert entire project to initial commit.  
+**Step Required** Use git log to find commit hash.
+Use git reset --hard <hash> command to reset the branch.
+Use git push origin main --force-with-lease to force push the changes into remote repository.
+**Why chosen:** Easier compared to manually undo all changes.
+
+## 2025-10-11 — OpenGL Function Loader
+
+**Decision:** Starting to use GLAD.  
+**Alternatives considered:** GLEW.  
+**Why chosen:** GLEW is outdated, even cherno doesnt use it now.
