@@ -90,8 +90,31 @@ int main(void)
 
 
 
+    //3.2 We will now create vertex buffer that will store our vertex data
+    // VBO is aktually an array of references, but since we only have one object we only need one
+    GLuint VAO ,VBO;
 
+    //Otherwise we can declare it like this  GLuint VBO[5]
+    // We can create the buffer like this
+    glGenVertexArrays(1, &VAO);// 3.5 make sure to generate VAOs before VBOs
 
+    glGenBuffers(1, &VBO); // First argument is 1 because we only one 3d object and then pass the reference
+
+    glBindVertexArray(VAO); //3.5 Bind VAO
+
+    // 3.3 Binding- binding is concept we make any object our current object
+    // so when we fire a function a function that modifies that type of object, it modifies the current object i.e. the binded object
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);   //we use gl array buffer cause we need to use that for our vertex buffer
+
+    // 3.4 Now lets actually store our vetices in the buffer
+    //Type of data, size of buffer, and data itself(vertices), and finally we specify the use of this data
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // 3.5 VAOs are used to find VBOs and to quickly switch between different VBOs
+    // 3.6 Now lets configure VAO
+    // Refer LearnOPenGL - Linking Vertex Attributes
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
 
 
@@ -108,9 +131,19 @@ int main(void)
 
     while (!glfwWindowShouldClose(window)) 
     {
+        glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glfwSwapBuffers(window);
         processInput(window);
         glfwPollEvents();
     }
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteProgram(shaderProgram);
 
     glfwDestroyWindow(window);
     glfwTerminate();
