@@ -24,10 +24,20 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, 0.0f,     //Lower left corner
+        0.5f, -0.5f, 0.0f,      //Lower right corner
+        0.0f,  0.5f, 0.0f,      //upper corner
+        -0.5f / 2, 0.5f / 2, 0.0f,  //Inner left
+        0.5f / 2, 0.5f/2, 0.0f,     //inner right
+        0.0f, -0.5f / 2, 0.0f       //inner down
+    };
+
+    GLuint indices[] =
+    {
+        0, 3, 5,    //Lower left
+        3, 2, 4,    //Lower right
+        5, 4, 1     //upper triangle
     };
 
     GLFWwindow* window = glfwCreateWindow(800, 600, "Chota Game Engine", NULL, NULL);
@@ -88,17 +98,16 @@ int main(void)
     // Sending stuff between CPU and GPU is slow
     //So, When we send data to the GPU, we try to send data in bunch and it is called buffer
 
-
-
     //3.2 We will now create vertex buffer that will store our vertex data
     // VBO is aktually an array of references, but since we only have one object we only need one
-    GLuint VAO ,VBO;
+    // 4.1 Also declare Index buffer EBO
+    GLuint VAO ,VBO, EBO;
 
     //Otherwise we can declare it like this  GLuint VBO[5]
     // We can create the buffer like this
     glGenVertexArrays(1, &VAO);// 3.5 make sure to generate VAOs before VBOs
-
     glGenBuffers(1, &VBO); // First argument is 1 because we only one 3d object and then pass the reference
+    glGenBuffers(1, &EBO); //4.2
 
     glBindVertexArray(VAO); //3.5 Bind VAO
 
@@ -110,11 +119,19 @@ int main(void)
     //Type of data, size of buffer, and data itself(vertices), and finally we specify the use of this data
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); //4.3
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);  //4.4
+
     // 3.5 VAOs are used to find VBOs and to quickly switch between different VBOs
     // 3.6 Now lets configure VAO
     // Refer LearnOPenGL - Linking Vertex Attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    //Bind both VBO and VAO to 0 so that we dont accidentally modify them
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);   //4.5
 
 
 
@@ -135,17 +152,22 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
         glfwSwapBuffers(window);
         processInput(window);
         glfwPollEvents();
     }
 
+    //Dekete all object we have created
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
 
+    //Delete the window before ending the program
     glfwDestroyWindow(window);
+    //terminate GLFW
     glfwTerminate();
 
     return 0;
